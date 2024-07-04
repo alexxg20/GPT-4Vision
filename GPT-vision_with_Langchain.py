@@ -89,9 +89,10 @@ def get_image_informations(image_path: str, output_path: str) -> dict:
     return result
 
 
-# all images are stored in a similar path, only their number varies.
+# in my case all images are stored in a similar path, only their number varies.
 photo_num = 22
-path = f"C:/fotos_gptvision/package_image{photo_num}.jpg" # path to our image
-output_path = f"C:/fotos_gptvision_resized/package_image{photo_num}_resized.jpg"
+path = f"C:/fotos_gptvision/package_image{photo_num}.jpg" # change to path to your image
+output_path = f"C:/fotos_gptvision_resized/package_image{photo_num}_resized.jpg" # change to desired path for resized image
+
 result = get_image_informations(path, output_path)
 print(result)
