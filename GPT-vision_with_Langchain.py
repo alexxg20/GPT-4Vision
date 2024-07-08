@@ -3,14 +3,14 @@ import langchain
 from langchain.chains import TransformChain
 import base64
 from langchain_core.pydantic_v1 import BaseModel, Field
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
 from langchain_openai import ChatOpenAI
 from langchain import globals
 from langchain_core.runnables import chain
 from langchain_core.output_parsers import JsonOutputParser
 from PIL import Image
 
-os.environ["OPENAI_API_KEY"] = ""
+os.environ["OPENAI_API_KEY"] = "your_api_here"
 
 # Define image resizing and conversion function
 def convert_and_resize(image_path, output_path):
@@ -23,7 +23,7 @@ Before processing any images, we need to load the image data from a file and enc
 in a format that can be passed to the language model. The function "load_image" takes a dictionary
 with an "image_path" key and returns a new dictionary with an "image" key containing the image data
 encoded as a base64 string.
-This is done using the built-in Python base64 library
+This is done using the Python base64 library
 '''
 def encode_image(output_path):
         with open(output_path, "rb") as image_file:
@@ -66,15 +66,28 @@ globals.set_debug(True)
 @chain
 def image_model(inputs: dict) -> str | list[str] | dict:
     """Invoke model with image and prompt."""
-    model = ChatOpenAI(temperature=0.5, model="gpt-4o", max_tokens=1000)
+    model = ChatOpenAI(temperature=0.5, model="gpt-4o", max_tokens=300)
     msg = model.invoke(
-             [HumanMessage(
+             [
+             # to give some more context to the model, you can specify their role 
+             # or give any additional context using SystemMessage
+             SystemMessage(content="You are an AI bot that helps the user assess the state of a package."
+                            ),
+             HumanMessage(
              content=[
              {"type": "text", "text": inputs["prompt"]},
              {"type": "text", "text": parser.get_format_instructions()},
              {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{inputs['image']}"}},
-             ])]
-             )
+             ])#,
+
+             # If the model has already responded, or you want to simulate it, use AIMessage, 
+             # then HumanMessage again to engage in a conversation with the model
+            
+             #AIMessage(content = ""),
+            
+             #HumanMessage(content = "Then, would you say the delivery has been successful?")
+             
+             ])
     return msg.content
 
 # define the parser 
@@ -85,14 +98,12 @@ def get_image_informations(image_path: str, output_path: str) -> dict:
     """
     vision_chain = load_image_chain | image_model | parser
     result =vision_chain.invoke({'image_path': f'{image_path}','output_path': output_path, 'prompt': vision_prompt})
-    print(str(type(result)) + "  here")
     return result
 
 
-# in my case all images are stored in a similar path, only their number varies.
-photo_num = 22
-path = f"C:/fotos_gptvision/package_image{photo_num}.jpg" # change to path to your image
-output_path = f"C:/fotos_gptvision_resized/package_image{photo_num}_resized.jpg" # change to desired path for resized image
-
+# all images are stored in a similar path, only the number varies.
+photo_num = 16
+path = f"C:/fotos_gptvision/package_image{photo_num}.jpg" # path to our image
+output_path = f"C:/fotos_gptvision_resized/package_image{photo_num}_resized.jpg"
 result = get_image_informations(path, output_path)
 print(result)
