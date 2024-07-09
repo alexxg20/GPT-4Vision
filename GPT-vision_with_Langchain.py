@@ -48,10 +48,10 @@ load_image_chain = TransformChain(
 
 # define the input that will be passed to gpt-vision and the structure of the desired output
 class ImageInformation (BaseModel):
-    seal_condition: str = Field(description = "intact/partially broken/completely broken")
-    surface_condition: str = Field(description = "description of surface condition")
-    external_condition: str = Field(description = "description of external condition")
-    damage_description: str = Field(description = "detailed damage description")
+    damage_seal: str = Field(description = "Is there any damage in the package's seal? Yes/No")
+    damage_surface: str = Field(description = "Is there any damage in the package's surface? Yes/No")
+    external_condition: str = Field(description = "Is there any external damage? Yes/No")
+    damage_description: str = Field(description = "Is the package severely damaged? Yes/No")
     potential_damaging_agents: list = Field(description = ["list", "of", "potential", "damaging", "agents"])
     delivered_correctly: str = Field(description = "have the packages been delivered correctly?")
     summary: str = Field(description = "brief summary of the assessment including overall condition and risks")
@@ -66,7 +66,7 @@ globals.set_debug(True)
 @chain
 def image_model(inputs: dict) -> str | list[str] | dict:
     """Invoke model with image and prompt."""
-    model = ChatOpenAI(temperature=0.5, model="gpt-4o", max_tokens=300)
+    model = ChatOpenAI(temperature=0.0, model="gpt-4o", max_tokens=300)
     msg = model.invoke(
              [
              # to give some more context to the model, you can specify their role 
