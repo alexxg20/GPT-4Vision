@@ -34,6 +34,9 @@ response = client.chat.completions.create(
     model="gpt-4o",
     messages=[
         {
+          "role": "system", "content": "You are an assistant that calculates the coordinates of an object within an image "
+       },
+        {
             "role": "user",
             "content": [
                 {"type": "text", "text": """You are assessing the condition of the package shown in the 
@@ -62,7 +65,11 @@ response = client.chat.completions.create(
             ],
         }
     ],
+    temperature = 0.7,
     max_tokens=300, # specify max number of tokens the output can generate (input is not limited)
+    response_format = {
+       "type": "text"
+    }
 )
 
 print(response.choices[0].message.content) # print the content of the response
